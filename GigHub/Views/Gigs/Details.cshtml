@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNet.Identity
+@model GigHub.Core.ViewModels.GigDetailsViewModel
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div style="position: relative">
+    <h2>@Model.Gig.Artist.Name</h2>
+    <button style="position: absolute; left: 250px; top: 0;" class="btn btn-default">Follow</button>
+</div>
+
+
+<p>Performing at @Model.Gig.Venue on @Model.Gig.DateTime</p>
+
+@if (User.Identity.IsAuthenticated && Model.IsAttending)
+{
+    <p>You are going to this event.</p>
+
+}
+

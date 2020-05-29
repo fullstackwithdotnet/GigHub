@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - GigHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Gig Hub", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Create Gig", "Create", "Gigs")</li>
+                </ul>
+
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/lib")
+    @Scripts.Render("~/bundles/app")
+    @RenderSection("scripts", required: false)
+
+    <script type="text/x-template" id="notification-template">
+        <ul class="notifications">
+            <%
+            _.each(notifications, function(notification) {
+            if(notification.notificationType == 1) { %>
+            <li><span class="highlight"><%= notification.gig.artist.name %></span> has canceled the gig at <%= notification.gig.venue %> on <%= moment(notification.gig.dateTime).format('MMMM Do YYYY, h:mm a') %>.</li>
+            <% }
+            else if(notification.notificationType == 2) {  %>
+            <li><%= notification.gig.artist.name %> has updated the gig at <%= notification.gig.venue %> at <%= notification.gig.dateTime %>.</li>
+            <%}
+
+            })
+            %>
+        </ul>
+    </script>
+
+    <script>
+
+        var headerToken = "Bearer --XL3Hf-HH0gDMYnThKEW5DDiLzCtR29TpqRXKUdjRxV9Y5amoO5bMKwHaBaY7aWXLPTvI3xWHFg6wivQGWo8z5_Zs0UZChG3jiMvNAPwOuCPypz9c3nTAmC2yO0GIHzoHuq3reKIJEBYcFq4UnE7BmAS5Vz6MqbtEeZjIp9cy3KS_jMaGJwXFXRhd4WDm5RPVnWm7m0o6wKuBvND5nhxbH-Ib7HNMTvVuu2FFknPRQ3kCGNha36HaITWW41HfKvEFx0GGhD2Aoek2LsJy-IsGrkkBrCUpgRGmEtN2vu0ilS4ZcqtJZ-00kHNYc7JY_JcRg-f4MRlP8drDidyCEsbhb6E4pM-AQjznNq4CpC1-UhH4TnmRRuDyi5JOowAz7oA7vjFjH35WBn7UFiDYzUYQswv5vzAzPS3RRoxpA_Mo0s44UlV8OvzHwrqY6zXJHvXEacgfrxP0H579auFYu-TAiFYembflOOKeHBTDpKXJM";
+
+        $(document).ready(function () {
+            $.ajax({
+                url: '/api/notifications',
+                type: 'GET',
+                contentType: 'application/json',
+                headers: { 'Authorization': headerToken },
+                success: function (result) {
+                    if (result.length === 0)
+                        return;
+
+                    $('.js-notifications-count').text(result.length)
+                        .removeClass('hide')
+                        .addClass("animate__animated animate__bounceInDown");
+
+                    $('.notifications').popover({
+                        html: true,
+                        title: "Notifications",
+                        content: function () {
+                            var compiled = _.template($("#notification-template").html());
+                            return compiled({ notifications: result });
+
+                        },
+                        placement: "bottom"
+                    }).on("shown.bs.popover", function () {
+
+                        $.ajax({
+                            url: '/api/notifications/read',
+                            type: 'GET',
+                            contentType: 'application/json',
+                            headers: { 'Authorization': headerToken },
+                            success: function () {
+                                $('.js-notifications-count').text("")
+                                    .addClass('hide');
+                            }
+                        });
+
+                    });
+                }
+            });
+
+
+
+
+
+        });
+    </script>
+</body>
+</html>
+
